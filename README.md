@@ -1,17 +1,41 @@
 # 🇺🇦 Ukrainian RAG
 
+**Core:**
 ![Python](https://img.shields.io/badge/Python-3.12+-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![Pydantic](https://img.shields.io/badge/Pydantic-E92063?logo=pydantic&logoColor=white)
+![dishka](https://img.shields.io/badge/DI-dishka-informational)
 ![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?logo=langchain&logoColor=white)
 ![LangGraph](https://img.shields.io/badge/LangGraph-1C3C3C?logo=langchain&logoColor=white)
-![vLLM](https://img.shields.io/badge/vLLM-Qwen3-6E40C9)
+
+**LLM providers:**
+![OpenAI](https://img.shields.io/badge/OpenAI-412991)
+![Anthropic](https://img.shields.io/badge/Anthropic-Claude-D97757?logo=anthropic&logoColor=white)
+![Gemini](https://img.shields.io/badge/Google-Gemini-8E75B2?logo=googlegemini&logoColor=white)
+![OpenRouter](https://img.shields.io/badge/OpenRouter-6566F1)
+![Groq](https://img.shields.io/badge/GroqCloud-F55036)
+![vLLM](https://img.shields.io/badge/vLLM-self--hosted-6E40C9)
+![Ollama](https://img.shields.io/badge/Ollama-000000?logo=ollama&logoColor=white)
+
+**Models & retrieval:**
+![Qwen3](https://img.shields.io/badge/Qwen3-Embedding%20%7C%20Reranker-615CED?logo=huggingface&logoColor=white)
+![BM25](https://img.shields.io/badge/BM25-LangChain-1C3C3C)
+![NLTK](https://img.shields.io/badge/NLTK-stopwords-154F5B)
+![pymorphy3](https://img.shields.io/badge/pymorphy3-uk%20lemmas-005BBB)
+
+**Vector DBs:**
 ![Qdrant](https://img.shields.io/badge/Qdrant-DC244C?logo=qdrant&logoColor=white)
 ![pgvector](https://img.shields.io/badge/pgvector-4169E1?logo=postgresql&logoColor=white)
 ![Weaviate](https://img.shields.io/badge/Weaviate-00C29A)
-![Groq](https://img.shields.io/badge/GroqCloud-F55036)
-![dishka](https://img.shields.io/badge/DI-dishka-informational)
+![Alembic](https://img.shields.io/badge/Alembic-async-6BA81E)
+
+**Delivery:**
 ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
+![nginx](https://img.shields.io/badge/nginx-009639?logo=nginx&logoColor=white)
+![uv](https://img.shields.io/badge/uv-DE5FE9?logo=uv&logoColor=white)
+![Ruff](https://img.shields.io/badge/Ruff-D7FF64?logo=ruff&logoColor=black)
+![GitHub Actions](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 > 💛 **Heads-up:** this is a just-for-fun project, built in about **30 minutes** with the help of AI.
@@ -29,6 +53,21 @@ A production-style **Retrieval-Augmented Generation backend for Ukrainian**, bui
 - **Prompt-injection hardening**: strict English system prompt, sanitized context, EN/UK injection heuristics.
 - **Clean architecture**: domain → application (use cases + DTOs) → infra / api, wired with [dishka](https://github.com/reagento/dishka); layer rules are enforced by a test.
 - **Streamlit UI**, Docker, nginx, async Alembic migrations (pgvector).
+
+### Integrations
+
+| Area | Integrations | Where |
+|---|---|---|
+| LLM APIs | **OpenAI**, **Anthropic (Claude)**, **Google Gemini**, **OpenRouter**, **GroqCloud** | `app/infra/llm/` |
+| Self-hosted LLMs | **vLLM** (Qwen3-8B-AWQ), **Ollama** | `app/infra/llm/openai_compatible.py` |
+| Embeddings | **Qwen3-Embedding-8B** on vLLM (OpenAI-compatible `/v1/embeddings`) | `app/infra/embedder.py` |
+| Reranker | **Qwen3-Reranker** on vLLM (`/rerank`) | `app/infra/reranker.py` |
+| Lexical search | **LangChain `BM25Retriever`** + NLTK stopwords + pymorphy3 (uk) | `app/infra/bm25.py` |
+| Parsing | **LangChain** loaders: PDF, DOCX, TXT, MD, HTML, **WebBaseLoader** for URLs | `app/infra/parsing.py` |
+| Orchestration | **LangGraph** | `app/application/rag/` |
+| Vector DBs | **Qdrant**, **pgvector** (PostgreSQL + async Alembic), **Weaviate** | `app/infra/vectorstores/` |
+| API & DI | **FastAPI**, Pydantic, **dishka**, SSE streaming | `app/api/`, `app/di/` |
+| UI & delivery | **Streamlit**, Docker Compose, nginx, GitHub Actions (ruff + pytest) | `ui/`, `deploy/`, `.github/` |
 
 ---
 
@@ -356,12 +395,6 @@ The streaming endpoints emit SSE events: `sources` (once, with metadata) → `to
 
 These measures reduce risk, but no prompt-level defence is perfect.
 
-## Extending
-
-- **New LLM provider**: implement the `LLMClient` port (`generate`, `stream`) in `app/infra/llm/`, then register it in `LLM_PROVIDERS` (`app/infra/llm/factory.py`).
-- **New vector DB**: implement the `VectorStore` port in `app/infra/vectorstores/`, then register it in `VECTOR_STORES` (`factory.py`).
-- **New use case**: add command/result DTOs in `app/application/dto/`, a service in `app/application/services/`, a schema + router in `app/api/`, and register the service in `app/di/providers.py`.
-- **New file type**: add a LangChain loader to `LOADERS` (`app/infra/parsing.py`).
 
 ## License
 
